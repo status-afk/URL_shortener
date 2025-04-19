@@ -25,6 +25,11 @@ services:
     networks:
       - app-network
 
+  redis:
+    image: redis:7-alpine
+    networks:
+      - app-network
+
 volumes:
   postgres_data:
 
