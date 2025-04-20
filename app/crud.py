@@ -4,8 +4,6 @@ from .auth import get_password_hash
 import hashlib
 from fastapi import HTTPException
 
-def get_url_by_short_code(db: Session, short_code: str):
-    return db.query(models.URL).filter(models.URL.short_code == short_code).first()
 
 def base62_encode(num: int) -> str:
     """Convert an integer to a base62 string."""
@@ -40,14 +38,10 @@ def create_url(db: Session, url: schemas.URLCreate, user_id: int = None):
         hash_obj = hashlib.md5(str(url.original_url).encode())
         short_code = base62_encode(int(hash_obj.hexdigest(), 16))[:7]
 
-    # If custom alias isn't provided, handle collision by regenerating short code
-    if not url.custom_alias:
-        existing = db.query(models.URL).filter(models.URL.short_code == short_code).first()
-        while existing:
-            # Generate a new short code if the current one is already in use
-            hash_obj = hashlib.md5(str(url.original_url + str(existing.id)).encode())
-            short_code = base62_encode(int(hash_obj.hexdigest(), 16))[:7]
-            existing = db.query(models.URL).filter(models.URL.short_code == short_code).first()
+    # Check for collision
+    existing = db.query(models.URL).filter(models.URL.short_code == short_code).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Short code already in use")
 
     db_url = models.URL(
         original_url=str(url.original_url),  # Convert to string for storage
@@ -60,3 +54,5 @@ def create_url(db: Session, url: schemas.URLCreate, user_id: int = None):
     return db_url
 
 
+def get_url_by_short_code(db: Session, short_code: str):
+    return db.query(models.URL).filter(models.URL.short_code == short_code).first()
