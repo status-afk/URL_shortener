@@ -4,6 +4,8 @@ from .auth import get_password_hash
 import hashlib
 from fastapi import HTTPException
 
+def get_url_by_short_code(db: Session, short_code: str):
+    return db.query(models.URL).filter(models.URL.short_code == short_code).first()
 
 def base62_encode(num: int) -> str:
     """Convert an integer to a base62 string."""
@@ -56,4 +58,5 @@ def create_url(db: Session, url: schemas.URLCreate, user_id: int = None):
     db.commit()
     db.refresh(db_url)
     return db_url
+
 
