@@ -31,6 +31,16 @@ def get_user_by_email(db: Session, email: str):
 
 
 def create_url(db: Session, url: schemas.URLCreate, user_id: int = None):
+    # Check if the original URL already exists for this user
+    existing_url = db.query(models.URL).filter(
+        models.URL.original_url == str(url.original_url),
+        models.URL.user_id == user_id
+    ).first()
+
+    if existing_url:
+        # Return the existing URL object to match URLOut schema
+        return existing_url
+
     # Generate short code
     short_code = url.custom_alias
     if not short_code:
