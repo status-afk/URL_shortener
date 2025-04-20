@@ -10,6 +10,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI()
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+
+# Allowing all origins (replace with specific origins for production)
+app.add_middleware(
+    CORSMiddleware,  # CORSMiddleware is the middleware to be added
+    allow_origins=["*"],  # or list the specific domains like ["http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Remove redis initialization and usage
 # redis = Redis.from_url(os.getenv("REDIS_URL"))
